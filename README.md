@@ -2,8 +2,6 @@
 
 > 一款 Obsidian 插件，将首页变为可配置的导航仪表盘，并支持贡献热力图追踪。
 
-**[English](README_EN.md)**
-
 [![Min App Version](https://img.shields.io/badge/Obsidian-1.3.0%2B-7C3AED?logo=obsidian)](https://obsidian.md/)
 [![Version](https://img.shields.io/badge/Version-2026.4-22C55E)](https://github.com/nightfall-yl/Obsidian-Homeboard/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)

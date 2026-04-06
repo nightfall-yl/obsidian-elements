@@ -2,8 +2,6 @@
 
 > An Obsidian plugin that turns your homepage into a configurable navigation dashboard with contribution tracking.
 
-**[中文文档](README.md)**
-
 [![Min App Version](https://img.shields.io/badge/Obsidian-1.3.0%2B-7C3AED?logo=obsidian)](https://obsidian.md/)
 [![Version](https://img.shields.io/badge/Version-2026.4-22C55E)](https://github.com/nightfall-yl/Obsidian-Homeboard/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
