@@ -1,73 +1,58 @@
-# Homeboard
+<p align="center">
+  <h1 align="center">🏠 Homeboard</h1>
+  <p align="center">将 Obsidian 首页变成可配置的导航仪表盘</p>
+  <p align="center">
+    <img src="https://img.shields.io/badge/Obsidian-1.3.0+-7C3AED?logo=obsidian" alt="Min App Version">
+    <img src="https://img.shields.io/badge/Version-2026.4-22C55E" alt="Version">
+    <img src="https://img.shields.io/badge/License-MIT-blue" alt="License">
+  </p>
+</p>
 
-`Homeboard` 是一个 Obsidian 插件，用来把你的首页笔记做成“可配置的导航仪表盘”。
+---
 
-当前版本聚焦于：
-- `homeboard` 多列布局
-- `links` 导航卡片
-- 可视化 `Homepage Builder`
+## ✨ 功能亮点
 
-## 功能特点
+- 🎨 **可视化 Builder** — 拖拽式仪表盘搭建，所见即所得
+- 📐 **多列布局** — 支持 1~4 列自由排版，列宽可拖拽调整并自动记忆
+- 🔗 **Links 导航卡片** — 快捷入口、项目索引、外部链接，一卡搞定
+- 🗓️ **热力图** — GitHub 风格的贡献热力图，追踪你的创作节奏
+- ✏️ **原地编辑** — 光标放在代码块上即可通过命令回填编辑，无需重新创建
+- 🌐 **多语言** — 支持中文 / English
 
-- 支持 `homeboard` 代码块渲染首页卡片布局
-- 支持多列卡片排版
-- 支持拖拽调整列宽，并自动记住宽度
-- 支持可视化 `Homepage Builder`
-- 支持编辑已有 `homeboard` 代码块并回填到 Builder
-- 当前只保留 `links` 卡片
-- 已恢复 `heatmap` 代码块渲染、创建与编辑能力
+## 📦 安装
 
-## 安装
+### 手动安装
 
-### 方式一：直接安装编译产物
+1. 下载 [releases](https://github.com/nightfall-yl/Obsidian-Homeboard/releases) 中的最新版本
+2. 将以下文件放入你的 Obsidian 插件目录：
 
-已经编译好的安装文件在：
-
-- [release/main.js](/Users/yanfan/Documents/Codex/homeboard/release/main.js)
-- [release/manifest.json](/Users/yanfan/Documents/Codex/homeboard/release/manifest.json)
-- [release/styles.css](/Users/yanfan/Documents/Codex/homeboard/release/styles.css)
-
-把这 3 个文件复制到你的 Obsidian 插件目录：
-
-```text
-.obsidian/plugins/obsidian-homeboard/
+```
+.vault/.obsidian/plugins/obsidian-homeboard/
+├── main.js
+├── manifest.json
+└── styles.css
 ```
 
-然后在 Obsidian 里启用 `Homeboard`。
+3. 在 Obsidian 设置 → 社区插件中启用 **Homeboard**
 
-### 方式二：本地开发构建
+### 从源码构建
 
 ```bash
+git clone https://github.com/nightfall-yl/Obsidian-Homeboard.git
+cd Obsidian-Homeboard
 npm install
 npm run build
 ```
 
-`npm run build` 会同时更新根目录产物和 `release/` 下的安装文件。
+构建产物会输出到根目录及 `release/` 目录。
 
-## 使用方法
+## 🚀 快速上手
 
-### 1. 打开可视化 Builder
+### 创建首页仪表盘
 
-插件启用后，可以通过以下方式打开：
+在任意 Markdown 文件中插入 `homeboard` 代码块：
 
-- 命令面板运行 `Open Homeboard builder`
-
-Builder 现在会直接绑定当前 `homeboard` 代码块，调整即生效。
-
-### 2. 编辑已有 homeboard 代码块
-
-把光标放在一个现有的 `homeboard` 代码块内部，然后运行命令：
-
-```text
-Edit Homeboard block at cursor
-```
-
-插件会自动读取当前配置，打开 Builder，并在保存后直接回写原代码块。
-
-### 3. 使用 homeboard 代码块
-
-示例：
-
+````markdown
 ```homeboard
 id: homepage-main
 title: 我的首页
@@ -75,19 +60,19 @@ columns: 2
 gap: 16
 cards:
   - type: links
-    title: CODE信息管理
+    title: 常用入口
     span: 1
     linksLayout: inline
     links:
       - label: 收件箱
         url: 00.收件箱-Index
-      - label: 快速捕获
-        url: QuickCap
       - label: 日记
         url: 00.Daily Index
+      - label: 快速捕获
+        url: QuickCap
 
   - type: links
-    title: PARA组织管理
+    title: PARA 管理
     span: 1
     linksLayout: inline
     links:
@@ -98,76 +83,92 @@ cards:
       - label: 资源
         url: 00.资源 Index
 ```
+````
 
-## 卡片类型说明
+### 使用可视化 Builder
 
-### `links`
+通过命令面板运行 `Open Homeboard builder` 打开拖拽式搭建界面。
 
-适合放常用页面、项目入口、外部网站。
+> 💡 **提示**：给每个代码块设置固定 `id`（如 `id: homepage-main`），可确保列宽拖拽结果持久化。
+
+### 编辑已有代码块
+
+将光标移入现有的 `homeboard` 代码块，运行命令面板中的 `Edit Homeboard block at cursor`，即可读取当前配置并在保存后回写。
+
+## 📖 配置参考
+
+### 基本参数
+
+| 参数 | 说明 | 默认值 |
+|------|------|--------|
+| `id` | 代码块唯一标识（推荐设置，用于记忆列宽） | 自动生成 |
+| `title` | 仪表盘标题 | — |
+| `columns` | 列数（1~4） | 2 |
+| `gap` | 卡片间距（px） | 16 |
+| `cards` | 卡片列表 | — |
+
+### 卡片类型
+
+#### `links` — 导航卡片
+
+适合放置常用页面、项目入口、外部网站。
 
 ```yaml
 - type: links
   title: Quick Links
+  linksLayout: inline        # inline | list
   links:
     - label: Inbox
       url: obsidian://open?vault=YourVault&file=Inbox
     - label: GitHub
       url: https://github.com/
-      external: true
+      external: true          # 标记为外部链接
 ```
 
-## 列布局与拖拽
+| 字段 | 说明 |
+|------|------|
+| `title` | 卡片标题 |
+| `span` | 跨列数 |
+| `linksLayout` | 链接排列方式：`inline`（内联）或 `list`（列表） |
+| `links` | 链接列表，每项含 `label`、`url`，可选 `external` |
 
-- `columns` 控制首页列数，范围 1 到 4
-- `gap` 控制卡片间距
-- 每张卡片可以通过 `span` 跨列
-- 预览模式下可以拖动列分隔条调整列宽
-- 宽度会保存在本地 localStorage 中
+## 🎮 操作方式
 
-为了让拖拽结果稳定，建议给每个 `homeboard` 代码块设置固定的 `id`：
+| 方式 | 说明 |
+|------|------|
+| **命令面板** | `Insert Homeboard block` / `Open Homeboard builder` / `Edit Homeboard block at cursor` |
+| **右键菜单** | 编辑区右键 → 新增 Homeboard 组件 → 新建热力图 / 新建分栏 |
+| **编辑按钮** | 阅读模式下代码块旁的浮动编辑按钮 |
 
-```yaml
-id: homepage-main
+## 🔧 技术栈
+
+- TypeScript + React
+- Obsidian API
+- esbuild 构建
+- Luxon 日期处理
+
+## 📁 项目结构
+
+```
+src/
+├── main.ts              # 插件入口
+├── builderModal.ts      # Builder 模态框
+├── homepageProcessor.ts # 代码块解析与渲染
+├── homepageConfig.ts    # 配置类型
+├── homepageTypes.ts     # 类型定义
+├── homepageYaml.ts      # YAML 解析
+├── i18/                 # 国际化（中/英）
+├── processor/           # 数据处理
+├── query/               # Dataview 查询
+├── render/              # 图表渲染（热力图、日历图等）
+├── view/                # React 组件
+└── util/                # 工具函数
 ```
 
-## 插件命令
+## 📄 License
 
-- `Insert Homeboard block`
-- `Open Homeboard builder`
-- `Edit Homeboard block at cursor`
+[MIT](LICENSE)
 
-在任意 Markdown 文档编辑区右键，可以选择“新增Homeboard组件”，再从二级菜单里点“新建热力图”或“新建分栏”。
+## 🙏 致谢
 
-## 设置项
-
-插件设置页入口已移除，当前主要通过命令面板、右键菜单和区块内编辑按钮操作。
-
-## 当前状态
-
-当前版本：`2026.3`
-
-已经实现：
-- 可视化 Builder
-- 已有 block 回填编辑
-- Links 导航卡片
-- 列宽拖拽持久化
-
-后续可以继续增强：
-- 继续收敛热力图与 Homeboard 的交互整合
-- 点击预览卡片自动定位到对应编辑区
-- 更多导航样式
-
-## 开发
-
-项目目录：
-
-- [src/main.ts](/Users/yanfan/Documents/Codex/homeboard/src/main.ts)
-- [src/builderModal.ts](/Users/yanfan/Documents/Codex/homeboard/src/builderModal.ts)
-- [src/homepageProcessor.ts](/Users/yanfan/Documents/Codex/homeboard/src/homepageProcessor.ts)
-- [src/settings.ts](/Users/yanfan/Documents/Codex/homeboard/src/settings.ts)
-
-构建命令：
-
-```bash
-npm run build
-```
+基于 [Obsidian](https://obsidian.md/) 插件 API 构建。
