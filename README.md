@@ -1,41 +1,33 @@
-<p align="center">
-  <h1 align="center">🏠 Homeboard</h1>
-  <p align="center">将 Obsidian 首页变成可配置的导航仪表盘</p>
-  <p align="center">
-    <img src="https://img.shields.io/badge/Obsidian-1.3.0+-7C3AED?logo=obsidian" alt="Min App Version">
-    <img src="https://img.shields.io/badge/Version-2026.4-22C55E" alt="Version">
-    <img src="https://img.shields.io/badge/License-MIT-blue" alt="License">
-  </p>
-</p>
+# Homeboard
 
----
+> An Obsidian plugin that turns your homepage into a configurable navigation dashboard with contribution tracking.
 
-## ✨ 功能亮点
+[![Min App Version](https://img.shields.io/badge/Obsidian-1.3.0%2B-7C3AED?logo=obsidian)](https://obsidian.md/)
+[![Version](https://img.shields.io/badge/Version-2026.4-22C55E)](https://github.com/nightfall-yl/Obsidian-Homeboard/releases)
+[![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
-- 🎨 **可视化 Builder** — 拖拽式仪表盘搭建，所见即所得
-- 📐 **多列布局** — 支持 1~4 列自由排版，列宽可拖拽调整并自动记忆
-- 🔗 **Links 导航卡片** — 快捷入口、项目索引、外部链接，一卡搞定
-- 🗓️ **热力图** — GitHub 风格的贡献热力图，追踪你的创作节奏
-- ✏️ **原地编辑** — 光标放在代码块上即可通过命令回填编辑，无需重新创建
-- 🌐 **多语言** — 支持中文 / English
+Homeboard provides two core features that can be used independently or combined on the same page:
 
-## 📦 安装
+- **Homeboard** — Build a multi-column navigation card layout via `homeboard` code blocks
+- **Contribution Graph** — Render GitHub-style heatmaps via `contributionGraph` code blocks to track your note-taking rhythm
 
-### 手动安装
+## Installation
 
-1. 下载 [releases](https://github.com/nightfall-yl/Obsidian-Homeboard/releases) 中的最新版本
-2. 将以下文件放入你的 Obsidian 插件目录：
+### Manual
+
+1. Download the latest [release](https://github.com/nightfall-yl/Obsidian-Homeboard/releases)
+2. Extract `main.js`, `manifest.json`, and `styles.css` into your vault's plugin folder:
 
 ```
-.vault/.obsidian/plugins/obsidian-homeboard/
+.obsidian/plugins/obsidian-homeboard/
 ├── main.js
 ├── manifest.json
 └── styles.css
 ```
 
-3. 在 Obsidian 设置 → 社区插件中启用 **Homeboard**
+3. Enable **Homeboard** in Settings → Community Plugins
 
-### 从源码构建
+### From Source
 
 ```bash
 git clone https://github.com/nightfall-yl/Obsidian-Homeboard.git
@@ -44,131 +36,248 @@ npm install
 npm run build
 ```
 
-构建产物会输出到根目录及 `release/` 目录。
+### Prerequisites
 
-## 🚀 快速上手
+- [Dataview](https://github.com/blacksmithgu/obsidian-dataview) plugin (required for Contribution Graph queries)
 
-### 创建首页仪表盘
+---
 
-在任意 Markdown 文件中插入 `homeboard` 代码块：
+## Homeboard
+
+Create a dashboard with multi-column card layouts using the `homeboard` code block.
+
+### Quick Start
 
 ````markdown
 ```homeboard
 id: homepage-main
-title: 我的首页
+title: My Dashboard
 columns: 2
 gap: 16
 cards:
   - type: links
-    title: 常用入口
+    title: Quick Access
     span: 1
     linksLayout: inline
     links:
-      - label: 收件箱
-        url: 00.收件箱-Index
-      - label: 日记
+      - label: Inbox
+        url: 00.Inbox
+      - label: Daily Note
         url: 00.Daily Index
-      - label: 快速捕获
-        url: QuickCap
+      - label: Projects
+        url: 00.Projects
 
   - type: links
-    title: PARA 管理
+    title: Resources
     span: 1
-    linksLayout: inline
+    linksLayout: list
     links:
-      - label: 项目
-        url: 00.项目 Index
-      - label: 领域
-        url: 00.领域 Index
-      - label: 资源
-        url: 00.资源 Index
+      - label: GitHub
+        url: https://github.com
+        external: true
 ```
 ````
 
-### 使用可视化 Builder
+### Builder
 
-通过命令面板运行 `Open Homeboard builder` 打开拖拽式搭建界面。
+Open the visual builder via the command palette: `Open Homeboard builder`.
 
-> 💡 **提示**：给每个代码块设置固定 `id`（如 `id: homepage-main`），可确保列宽拖拽结果持久化。
+To edit an existing block, place your cursor inside a `homeboard` code block and run `Edit Homeboard block at cursor`. Changes are written back to the source block on save.
 
-### 编辑已有代码块
+You can also right-click in the editor and select **New Homeboard Component** from the context menu.
 
-将光标移入现有的 `homeboard` 代码块，运行命令面板中的 `Edit Homeboard block at cursor`，即可读取当前配置并在保存后回写。
+### Configuration
 
-## 📖 配置参考
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `id` | Unique block identifier (recommended for persisting column widths) | Auto-generated |
+| `title` | Dashboard title | — |
+| `columns` | Number of columns (1–4) | 2 |
+| `gap` | Gap between cards in px | 16 |
+| `cards` | List of cards | — |
 
-### 基本参数
+### Links Card
 
-| 参数 | 说明 | 默认值 |
-|------|------|--------|
-| `id` | 代码块唯一标识（推荐设置，用于记忆列宽） | 自动生成 |
-| `title` | 仪表盘标题 | — |
-| `columns` | 列数（1~4） | 2 |
-| `gap` | 卡片间距（px） | 16 |
-| `cards` | 卡片列表 | — |
+| Field | Description |
+|-------|-------------|
+| `title` | Card title |
+| `span` | Number of columns to span |
+| `linksLayout` | `inline` or `list` |
+| `palettePreset` | Color scheme: `sage` `mist` `amber` `plum` `slate` |
+| `links` | List of links, each with `label` and `url`. Set `external: true` for external links |
 
-### 卡片类型
+Column widths can be dragged to resize in reading mode. Widths are saved to `localStorage` — set a fixed `id` on each block to ensure persistence.
 
-#### `links` — 导航卡片
+---
 
-适合放置常用页面、项目入口、外部网站。
+## Contribution Graph
+
+Render GitHub-style contribution heatmaps based on Dataview queries. Inspired by [obsidian-contribution-graph](https://github.com/vran-dev/obsidian-contribution-graph).
+
+### Quick Start
+
+````markdown
+```contributionGraph
+title: Contributions
+graphType: default
+dateRangeType: LATEST_DAYS
+dateRangeValue: 365
+dataSource:
+  type: PAGE
+  value: '""'
+  dateField:
+    type: FILE_CTIME
+  countField:
+    type: DEFAULT
+```
+````
+
+You can also create graphs via the command palette (`New Heatmap`) or the right-click context menu, which opens a visual configuration form.
+
+### Graph Types
+
+| Type | `graphType` | Description |
+|------|-------------|-------------|
+| Git Style | `default` | Classic GitHub layout, one column per week |
+| Month Track | `month-track` | One row per month |
+| Calendar | `calendar` | Traditional calendar layout |
+
+### Configuration
+
+#### Basic
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `title` | Graph title | `"Contributions"` |
+| `graphType` | Graph type | `"default"` |
+| `dateRangeType` | Date range mode | `"LATEST_DAYS"` |
+| `dateRangeValue` | Numeric value for date range | `180` |
+| `startOfWeek` | Week start day (0=Sun, 1=Mon) | 1 for Chinese locale |
+
+**Date range modes:**
+
+| Value | Description | Required Params |
+|-------|-------------|-----------------|
+| `LATEST_DAYS` | Last N days | `dateRangeValue` |
+| `LATEST_MONTH` | Last N complete months | `dateRangeValue` |
+| `LATEST_YEAR` | Last N complete years | `dateRangeValue` |
+| `FIXED_DATE_RANGE` | Fixed date range | `fromDate` + `toDate` (yyyy-MM-dd) |
+
+#### Data Source
 
 ```yaml
-- type: links
-  title: Quick Links
-  linksLayout: inline        # inline | list
-  links:
-    - label: Inbox
-      url: obsidian://open?vault=YourVault&file=Inbox
-    - label: GitHub
-      url: https://github.com/
-      external: true          # 标记为外部链接
+dataSource:
+  type: PAGE                    # PAGE | ALL_TASK | TASK_IN_SPECIFIC_PAGE
+  value: '#tag'                 # Dataview query expression
+  dateField:
+    type: FILE_CTIME            # Date field type
+    value: propertyName         # Property name (for PAGE_PROPERTY/TASK_PROPERTY)
+    format: yyyy-MM-dd          # Date format (optional)
+  countField:
+    type: DEFAULT               # DEFAULT | PAGE_PROPERTY | TASK_PROPERTY
+    value: propertyName         # Count field name
+  filters:                      # Optional
+    - type: STATUS_IS
+      value: COMPLETED
 ```
 
-| 字段 | 说明 |
-|------|------|
-| `title` | 卡片标题 |
-| `span` | 跨列数 |
-| `linksLayout` | 链接排列方式：`inline`（内联）或 `list`（列表） |
-| `links` | 链接列表，每项含 `label`、`url`，可选 `external` |
+**Data source types:**
 
-## 🎮 操作方式
+| Type | Description |
+|------|-------------|
+| `PAGE` | Query pages (by creation/modification time, filename, or page property) |
+| `ALL_TASK` | Query all tasks in vault |
+| `TASK_IN_SPECIFIC_PAGE` | Query tasks in specific pages |
 
-| 方式 | 说明 |
-|------|------|
-| **命令面板** | `Insert Homeboard block` / `Open Homeboard builder` / `Edit Homeboard block at cursor` |
-| **右键菜单** | 编辑区右键 → 新增 Homeboard 组件 → 新建热力图 / 新建分栏 |
-| **编辑按钮** | 阅读模式下代码块旁的浮动编辑按钮 |
+**Date field types:**
 
-## 🔧 技术栈
+| Type | Description |
+|------|-------------|
+| `FILE_CTIME` | File creation time |
+| `FILE_MTIME` | File modification time |
+| `FILE_NAME` | Filename (must contain date pattern) |
+| `PAGE_PROPERTY` | Date property on the page |
+| `TASK_PROPERTY` | Date property on the task |
 
-- TypeScript + React
-- Obsidian API
-- esbuild 构建
-- Luxon 日期处理
+**Filters (task sources only):**
 
-## 📁 项目结构
+| Type | Description |
+|------|-------------|
+| `STATUS_IS` | Task status equals value |
+| `STATUS_IN` | Task status matches any of the values |
+| `CONTAINS_ANY_TAG` | Contains any of the specified tags |
+
+**Task status options:** `COMPLETED` / `FULLY_COMPLETED` / `INCOMPLETE` / `CANCELED` / `ANY`
+
+#### Style
+
+| Parameter | Description | Default |
+|-----------|-------------|---------|
+| `fillTheScreen` | Expand to fill screen width | `false` |
+| `enableMainContainerShadow` | Enable container shadow | `false` |
+| `showCellRuleIndicators` | Show color scale legend | `true` |
+
+**Built-in themes (selectable in visual form):**
+
+| Theme | Description |
+|-------|-------------|
+| `default` | Classic GitHub green |
+| `ocean` | Ocean blue |
+| `halloween` | Warm amber |
+| `lovely` | Cherry blossom pink |
+| `wine` | Wine red |
+
+Cell shape supports rounded (default), square (`borderRadius: "0%"`), and circle (`borderRadius: "50%"`). Cell size can be adjusted via `cellStyle.minWidth` / `cellStyle.minHeight`.
+
+---
+
+## Commands
+
+| Command | Description |
+|---------|-------------|
+| `Insert Homeboard block` | Insert a new `homeboard` code block |
+| `Open Homeboard builder` | Open the visual builder |
+| `Edit Homeboard block at cursor` | Edit the `homeboard` block under cursor |
+| `New Heatmap` | Create a new contribution graph |
+
+Right-click in the editor to access **New Homeboard Component** from the context menu. Floating edit buttons are available in reading mode for both `homeboard` and `contributionGraph` blocks.
+
+---
+
+## Development
+
+Built with TypeScript, React, and esbuild.
 
 ```
 src/
-├── main.ts              # 插件入口
-├── builderModal.ts      # Builder 模态框
-├── homepageProcessor.ts # 代码块解析与渲染
-├── homepageConfig.ts    # 配置类型
-├── homepageTypes.ts     # 类型定义
-├── homepageYaml.ts      # YAML 解析
-├── i18/                 # 国际化（中/英）
-├── processor/           # 数据处理
-├── query/               # Dataview 查询
-├── render/              # 图表渲染（热力图、日历图等）
-├── view/                # React 组件
-└── util/                # 工具函数
+├── main.ts                    # Plugin entry point
+├── builderModal.ts            # Homeboard Builder modal
+├── homepageProcessor.ts       # homeboard block parsing & rendering
+├── homepageConfig.ts          # homeboard configuration
+├── homepageTypes.ts           # homeboard type definitions
+├── homepageYaml.ts            # homeboard YAML serialization
+├── types.ts                   # Contribution graph core types
+├── i18/                       # i18n (zh / en)
+├── processor/                 # Graph data processing & validation
+├── query/                     # Dataview query layer
+├── render/                    # Graph rendering (git-style, month-track, calendar)
+├── view/                      # React UI components
+└── util/                      # Utilities
 ```
 
-## 📄 License
+```bash
+npm install
+npm run build
+```
+
+---
+
+## License
 
 [MIT](LICENSE)
 
-## 🙏 致谢
+## Acknowledgements
 
-基于 [Obsidian](https://obsidian.md/) 插件 API 构建。
+Built on the [Obsidian](https://obsidian.md/) plugin API and [Dataview](https://github.com/blacksmithgu/obsidian-dataview).
+
+The Contribution Graph feature is inspired by [obsidian-contribution-graph](https://github.com/vran-dev/obsidian-contribution-graph) by [vran-dev](https://github.com/vran-dev), with deep integration and enhancements.
