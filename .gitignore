@@ -1,0 +1,17 @@
+/build/
+
+# Intellij
+*.iml
+.idea
+
+# npm
+node_modules
+
+# build
+*.js.map
+
+# build
+test.sh
+
+.DS_Store
+**/.DS_Store
