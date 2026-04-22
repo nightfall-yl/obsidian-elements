@@ -30,6 +30,7 @@ import { ForceViewModeManager } from "./forceViewMode";
 import { CursorPositionManager } from "./cursorPosition";
 import "../styles.css";
 
+
 declare global {
 	interface Window {
 		renderContributionGraph?: (

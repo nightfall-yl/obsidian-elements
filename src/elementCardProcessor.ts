@@ -66,7 +66,7 @@ export class ElementCardProcessor {
 		const sectionInfo = ctx.getSectionInfo?.(el);
 		const columns = this.normalizeColumns(config.columns);
 		const gap = this.normalizeGap(config.gap);
-		const blockId = this.getBlockId(config, ctx, el);
+		const blockId = this.getBlockId(config, ctx, code);
 
 		wrapper.style.setProperty("--elementCard-columns", String(columns));
 		wrapper.style.setProperty("--elementCard-gap", gap);
@@ -266,14 +266,48 @@ export class ElementCardProcessor {
 	private getBlockId(
 		config: ElementCardConfig,
 		ctx: MarkdownPostProcessorContext,
-		el: HTMLElement
+		code: string
 	): string {
 		if (config.id) {
 			return config.id;
 		}
 
-		const lineStart = ctx.getSectionInfo?.(el)?.lineStart ?? 0;
-		return `${ctx.sourcePath}::${lineStart}`;
+		// 使用文档路径和代码内容的哈希值作为稳定标识符
+		// 这样可以确保在编辑模式和预览模式下保持一致
+		const codeHash = this.generateCodeHash(ctx.sourcePath, code);
+		const blockId = `${ctx.sourcePath}::${codeHash}`;
+		
+		// 添加调试日志
+		console.log('ElementCard blockId:', blockId);
+		console.log('Code length:', code.length);
+		console.log('First 100 chars:', code.substring(0, 100));
+		
+		return blockId;
+	}
+
+	private generateCodeHash(sourcePath: string, code: string): string {
+		// 使用文档路径和代码内容生成哈希值
+		const combinedString = `${sourcePath}${code}`;
+		let hash = 0;
+		for (let i = 0; i < combinedString.length; i++) {
+			const char = combinedString.charCodeAt(i);
+			hash = ((hash << 5) - hash) + char;
+			hash = hash & hash;
+		}
+		return Math.abs(hash).toString();
+	}
+
+	private generateConfigHash(config: ElementCardConfig): string {
+		// 移除不稳定的属性，只使用影响布局的关键属性
+		const { id, ...stableConfig } = config;
+		const configString = JSON.stringify(stableConfig);
+		let hash = 0;
+		for (let i = 0; i < configString.length; i++) {
+			const char = configString.charCodeAt(i);
+			hash = ((hash << 5) - hash) + char;
+			hash = hash & hash;
+		}
+		return Math.abs(hash).toString();
 	}
 
 	private getWidthsStorageKey(blockId: string): string {
@@ -331,8 +365,11 @@ export class ElementCardProcessor {
 
 	private applyGridTemplate(grid: HTMLElement, widths: number[], heights?: number[]) {
 		grid.style.gridTemplateColumns = widths.map((value) => `${value}%`).join(" ");
+		// 使用固定高度，实现同步调整
 		if (heights && heights.length > 0) {
 			grid.style.gridTemplateRows = heights.map((value) => `${value}px`).join(" ");
+		} else {
+			grid.style.gridTemplateRows = "100px";
 		}
 	}
 
@@ -353,6 +390,7 @@ export class ElementCardProcessor {
 
 		let heights = [...initialHeights];
 		const rowResizers: HTMLElement[] = [];
+		const minHeight = 50;
 
 		const syncResizers = () => {
 			let cumulativeWidth = 0;
@@ -419,86 +457,42 @@ export class ElementCardProcessor {
 			}
 		}
 
-		// Row resizers (vertical)
-		// For single row, add a resizer at the bottom to adjust the row height
-		if (heights.length === 1) {
-			const resizer = shell.createDiv({ cls: "elementCard__resizer elementCard__resizer-row elementCard__resizer-single" });
-			resizer.dataset.index = "0";
-			resizer.dataset.direction = "row";
-			resizer.style.top = "100%";
-			rowResizers.push(resizer);
+		// Row resizer (vertical) - single row for all cards
+		const resizer = shell.createDiv({ cls: "elementCard__resizer elementCard__resizer-row elementCard__resizer-single" });
+		resizer.dataset.index = "0";
+		resizer.dataset.direction = "row";
+		resizer.style.top = "100%";
+		rowResizers.push(resizer);
 
-			let startY = 0;
-			let currentHeight = 0;
+		let startY = 0;
+		let currentHeight = 0;
 
-			const onMouseMove = (event: MouseEvent) => {
-				const delta = event.clientY - startY;
-				const nextHeight = currentHeight + delta;
-				if (nextHeight < 50) {
-					return;
-				}
-
-				heights[0] = nextHeight;
-				syncResizers();
-			};
-
-			const onMouseUp = () => {
-				document.body.classList.remove("cursor-row-resize");
-				document.removeEventListener("mousemove", onMouseMove);
-				document.removeEventListener("mouseup", onMouseUp);
-				this.saveRowHeights(blockId, heights);
-			};
-
-			resizer.addEventListener("mousedown", (event) => {
-				startY = event.clientY;
-				currentHeight = heights[0];
-				document.body.classList.add("cursor-row-resize");
-				document.addEventListener("mousemove", onMouseMove);
-				document.addEventListener("mouseup", onMouseUp);
-				event.preventDefault();
-			});
-		} else if (heights.length > 1) {
-			for (let index = 0; index < heights.length - 1; index++) {
-				const resizer = shell.createDiv({ cls: "elementCard__resizer elementCard__resizer-row" });
-				resizer.dataset.index = String(index);
-				resizer.dataset.direction = "row";
-				rowResizers.push(resizer);
-
-				let startY = 0;
-				let topHeight = 0;
-				let bottomHeight = 0;
-
-				const onMouseMove = (event: MouseEvent) => {
-					const delta = event.clientY - startY;
-					const nextTop = topHeight + delta;
-					const nextBottom = bottomHeight - delta;
-					if (nextTop < 50 || nextBottom < 50) {
-						return;
-					}
-
-					heights[index] = nextTop;
-					heights[index + 1] = nextBottom;
-					syncResizers();
-				};
-
-				const onMouseUp = () => {
-					document.body.classList.remove("cursor-row-resize");
-					document.removeEventListener("mousemove", onMouseMove);
-					document.removeEventListener("mouseup", onMouseUp);
-					this.saveRowHeights(blockId, heights);
-				};
-
-				resizer.addEventListener("mousedown", (event) => {
-					startY = event.clientY;
-					topHeight = heights[index];
-					bottomHeight = heights[index + 1];
-					document.body.classList.add("cursor-row-resize");
-					document.addEventListener("mousemove", onMouseMove);
-					document.addEventListener("mouseup", onMouseUp);
-					event.preventDefault();
-				});
+		const onMouseMove = (event: MouseEvent) => {
+			const delta = event.clientY - startY;
+			const nextHeight = currentHeight + delta;
+			if (nextHeight < minHeight) {
+				return;
 			}
-		}
+
+			heights[0] = nextHeight;
+			syncResizers();
+		};
+
+		const onMouseUp = () => {
+			document.body.classList.remove("cursor-row-resize");
+			document.removeEventListener("mousemove", onMouseMove);
+			document.removeEventListener("mouseup", onMouseUp);
+			this.saveRowHeights(blockId, heights);
+		};
+
+		resizer.addEventListener("mousedown", (event) => {
+			startY = event.clientY;
+			currentHeight = heights[0];
+			document.body.classList.add("cursor-row-resize");
+			document.addEventListener("mousemove", onMouseMove);
+			document.addEventListener("mouseup", onMouseUp);
+			event.preventDefault();
+		});
 
 		syncResizers();
 	}

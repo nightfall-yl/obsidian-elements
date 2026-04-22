@@ -69,12 +69,7 @@ async function updateVersionsJson() {
 	console.log(`Updated versions.json: added version ${currentVersion} with min Obsidian version ${minObsidianVersion}`);
 }
 
-async function syncReleaseArtifacts() {
-	await mkdir("release", { recursive: true });
-	await cp("main.js", "release/main.js");
-	await cp("manifest.json", "release/manifest.json");
-	await cp("styles.css", "release/styles.css");
-}
+
 
 const context = await esbuild.context({
 	banner: {
@@ -113,7 +108,6 @@ const context = await esbuild.context({
 if (prod) {
 	await context.rebuild();
 	await updateVersionsJson();
-	await syncReleaseArtifacts();
 	process.exit(0);
 } else {
 	await context.watch();
