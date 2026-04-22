@@ -1,9 +1,9 @@
 # Elements
 
-> An Obsidian plugin that turns your homepage into a configurable navigation dashboard with contribution heatmaps.
+> An Obsidian plugin that provides configurable navigation cards and contribution heatmaps for your homepage.
 
 [![Min App Version](https://img.shields.io/badge/Obsidian-1.3.0%2B-7C3AED?logo=obsidian)](https://obsidian.md/)
-[![Version](https://img.shields.io/badge/Version-26.4.2-22C55E)](https://github.com/nightfall-yl/obsidian-elements/releases)
+[![Version](https://img.shields.io/badge/Version-26.4.5-22C55E)](https://github.com/nightfall-yl/obsidian-elements/releases)
 [![License](https://img.shields.io/badge/License-MIT-blue)](LICENSE)
 
 Elements provides two core features that can be used independently or combined on the same page:
@@ -25,7 +25,7 @@ Elements provides two core features that can be used independently or combined o
 └── styles.css
 ```
 
-3. Enable **Trimmings** in Settings → Community Plugins
+3. Enable **Elements** in Settings → Community Plugins
 
 ### From Source
 
@@ -53,7 +53,7 @@ Create a dashboard with multi-column card layouts using the `elementCard` code b
 id: homepage-main
 title: My Dashboard
 columns: 2
-gap: 16
+gap: 2
 cards:
   - type: links
     title: Quick Access
@@ -80,11 +80,11 @@ cards:
 
 ### Builder
 
-Open the visual builder via the command palette: `Open Trimmings Builder`.
+Open the visual builder via the command palette: `Open Elements Builder`.
 
-To edit an existing block, place your cursor inside a `elementCard` code block and run `Edit Trimmings (elementCard) block at cursor`. Changes are written back to the source block on save.
+To edit an existing block, place your cursor inside a `elementCard` code block and run `Edit Elements (elementCard) block at cursor`. Changes are written back to the source block on save.
 
-You can also right-click in the editor and select **Add Trimmings Component** from the context menu.
+You can also right-click in the editor and select **Add Elements Component** from the context menu.
 
 ### Configuration
 
@@ -93,7 +93,7 @@ You can also right-click in the editor and select **Add Trimmings Component** fr
 | `id` | Unique block identifier (recommended for persisting column widths) | Auto-generated |
 | `title` | Dashboard title | — |
 | `columns` | Number of columns (1–4) | 2 |
-| `gap` | Gap between cards in px | 16 |
+| `gap` | Gap between cards in px | 2 |
 | `cards` | List of cards | — |
 
 ### Links Card

@@ -1,6 +1,6 @@
 # Elements
 
-> 一款 Obsidian 插件，将首页变为可配置的导航仪表盘，并支持贡献热力图追踪。
+> 一款 Obsidian 插件，为首页配置分栏导航卡片，并支持贡献热力图追踪。
 
 [![Min App Version](https://img.shields.io/badge/Obsidian-1.3.0%2B-7C3AED?logo=obsidian)](https://obsidian.md/)
 [![Version](https://img.shields.io/badge/Version-26.4.2-22C55E)](https://github.com/nightfall-yl/obsidian-elements/releases)
@@ -8,7 +8,7 @@
 
 Elements 提供两大核心功能，可独立使用，也可在同一页面组合：
 
-- **首页仪表盘** — 通过 `elementCard` 代码块构建多列导航卡片布局
+- **元素卡片** — 通过 `elementCard` 代码块构建多列导航卡片布局
 - **贡献图** — 通过 `contributionGraph` 代码块渲染 GitHub 风格热力图，追踪笔记创作节奏
 
 ## 安装
