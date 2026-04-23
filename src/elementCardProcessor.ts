@@ -390,7 +390,7 @@ export class ElementCardProcessor {
 
 		let heights = [...initialHeights];
 		const rowResizers: HTMLElement[] = [];
-		const minHeight = 50;
+		const minHeight = 100;
 
 		const syncResizers = () => {
 			let cumulativeWidth = 0;
