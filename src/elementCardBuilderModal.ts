@@ -537,7 +537,9 @@ export class ElementCardBuilderModal extends Modal {
 			return;
 		}
 
-		const triggerRect = triggerEl.getBoundingClientRect();
+		const anchorEl =
+			triggerEl.querySelector<HTMLElement>(".elementCard-builder-modal__palette-trigger-row") ?? triggerEl;
+		const triggerRect = anchorEl.getBoundingClientRect();
 		const menuEl = this.modalEl.createDiv({
 			cls: "elementCard-builder-modal__palette-menu plugin-config-palette-menu",
 		});
@@ -556,7 +558,7 @@ export class ElementCardBuilderModal extends Modal {
 
 		const handleOutsideClick = (event: MouseEvent) => {
 			const target = event.target as Node | null;
-			if (target && (triggerEl.contains(target) || menuEl.contains(target))) {
+			if (target && (anchorEl.contains(target) || triggerEl.contains(target) || menuEl.contains(target))) {
 				return;
 			}
 			closeMenu();

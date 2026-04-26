@@ -27,10 +27,12 @@ export class MonthTrackGraphRender extends BaseGraphRender {
 			this.renderTitle(graphConfig, main);
 		}
 
+		const chartsScrollEl = this.createChartsScrollEl(main);
+
 		// main -> charts
 		const chartsEl = createDiv({
 			cls: ["charts", "month-track"],
-			parent: main,
+			parent: chartsScrollEl,
 		});
 
 		this.renderCellRuleIndicator(graphConfig, main);

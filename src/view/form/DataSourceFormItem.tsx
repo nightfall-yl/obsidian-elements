@@ -118,7 +118,7 @@ export function DataSourceFormItem(props: {
 	const taskStatusOptions = getTaskStatusOptions();
 	return (
 		<Fragment>
-			<div className="form-item">
+			<div className="form-item form-item-source">
 				<span className="label">{local.form_data_source_value}</span>
 				<div className="form-content contribution-graph-modal__split-row">
 					<select
@@ -154,7 +154,7 @@ export function DataSourceFormItem(props: {
 			</div>
 
 			{taskDataSource.includes(dataSource.type) && (
-				<div className="form-item">
+				<div className="form-item form-item-filter">
 					<span className="label">
 						{local.form_data_source_filter_label}
 					</span>

@@ -31,10 +31,11 @@ export function GraphForm(props: {
 	const [cellRules, setCellRules] = useState<CellStyleRule[]>(
 		yamlConfig.cellStyleRules || []
 	);
-	const [showThemeMenu, setShowThemeMenu] = useState(false);
 	const formDataRef = useRef(formData);
 	const cellRulesRef = useRef(cellRules);
 	const hasMountedRef = useRef(false);
+	const themeTriggerRef = useRef<HTMLButtonElement>(null);
+	const closePaletteMenuRef = useRef<(() => void) | null>(null);
 	const graphOptions = getGraphOptions();
 	const dateTypeOptions = getDateTypeOptions();
 	const startOfWeekOptions = getStartOfWeekOptions();
@@ -66,24 +67,14 @@ export function GraphForm(props: {
 		submitCurrent();
 	}, [formData, cellRules]);
 
+	// Clean up palette menu when component unmounts
 	useEffect(() => {
-		if (!showThemeMenu) {
-			return;
-		}
-
-		const handleOutsideClick = (event: MouseEvent) => {
-			const target = event.target as Node | null;
-			if (target && themeWrapperRef.current?.contains(target)) {
-				return;
-			}
-			setShowThemeMenu(false);
-		};
-
-		document.addEventListener("click", handleOutsideClick, true);
 		return () => {
-			document.removeEventListener("click", handleOutsideClick, true);
+			if (closePaletteMenuRef.current) {
+				closePaletteMenuRef.current();
+			}
 		};
-	}, [showThemeMenu]);
+	}, []);
 
 	const handleCellShapeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
 		const { value } = e.target;
@@ -126,7 +117,89 @@ export function GraphForm(props: {
 		cellRulesRef.current = rules;
 		changeFormData("cellStyleRules", rules);
 		setCellRules(rules);
-		setShowThemeMenu(false);
+		if (closePaletteMenuRef.current) {
+			closePaletteMenuRef.current();
+		}
+	};
+
+	const togglePaletteMenu = () => {
+		if (closePaletteMenuRef.current) {
+			closePaletteMenuRef.current();
+			return;
+		}
+
+		const triggerEl = themeTriggerRef.current;
+		if (!triggerEl) return;
+
+		const triggerRect = triggerEl.getBoundingClientRect();
+		const modalEl = document.querySelector('.contribution-graph-modal-container');
+		if (!modalEl) return;
+
+		const menuEl = document.createElement('div');
+		menuEl.className = 'contribution-graph-modal__theme-menu plugin-config-palette-menu elementCard-builder-modal__palette-menu';
+		menuEl.style.position = 'fixed';
+		menuEl.style.left = `${triggerRect.left}px`;
+		menuEl.style.top = `${triggerRect.bottom + 5}px`;
+		menuEl.style.width = `${Math.max(triggerRect.width, 200)}px`;
+		menuEl.style.zIndex = '1000';
+		menuEl.style.boxSizing = 'border-box';
+
+		const closeMenu = () => {
+			menuEl.remove();
+			document.removeEventListener('click', handleOutsideClick, true);
+			if (closePaletteMenuRef.current === closeMenu) {
+				closePaletteMenuRef.current = null;
+			}
+		};
+
+		const handleOutsideClick = (event: MouseEvent) => {
+			const target = event.target as Node | null;
+			if (target && (triggerEl.contains(target) || menuEl.contains(target))) {
+				return;
+			}
+			closeMenu();
+		};
+
+		closePaletteMenuRef.current = closeMenu;
+
+		// Render theme options
+		themes.forEach((theme) => {
+			const button = document.createElement('button');
+			button.type = 'button';
+			button.className = `contribution-graph-modal__theme-option plugin-config-palette-option elementCard-builder-modal__palette-option ${activeTheme?.name === theme.name ? 'is-active' : ''}`;
+			
+			// Create label span
+			const labelSpan = document.createElement('span');
+			labelSpan.className = 'plugin-config-palette-label elementCard-builder-modal__palette-option-label';
+			labelSpan.textContent = theme.label;
+			button.appendChild(labelSpan);
+			
+			// Create swatches container
+			const swatchesContainer = document.createElement('div');
+			swatchesContainer.className = 'plugin-config-swatch-group elementCard-builder-modal__palette-swatches';
+			
+			// Add color swatches
+			getThemeSwatches(theme).forEach((color, index) => {
+				const swatch = document.createElement('span');
+				swatch.className = 'elementCard-builder-modal__palette-swatch elementCard-builder-modal__palette-swatch--small';
+				swatch.style.background = color;
+				swatchesContainer.appendChild(swatch);
+			});
+			
+			button.appendChild(swatchesContainer);
+			
+			button.addEventListener('click', () => {
+				applyTheme(theme.rules);
+				closeMenu();
+			});
+			menuEl.appendChild(button);
+		});
+
+		modalEl.appendChild(menuEl);
+
+		setTimeout(() => {
+			document.addEventListener('click', handleOutsideClick, true);
+		}, 0);
 	};
 
 	const getTitleFontSize = () => {
@@ -149,14 +222,14 @@ export function GraphForm(props: {
 	};
 
 	return (
-		<div className="contribution-graph-modal-content">
+		<div className="contribution-graph-modal-content plugin-config-modal">
 			<Tab
 				activeIndex={0}
 				tabs={[
 					{
 						title: local.form_basic_settings,
 						children: (
-							<div className="contribution-graph-modal-form">
+							<div className="contribution-graph-modal-form plugin-config-form">
 								<div className="form-group contribution-graph-modal__basic-group">
 									<div className="form-item">
 										<span className="label">
@@ -171,7 +244,7 @@ export function GraphForm(props: {
 													local.form_title_placeholder
 												}
 												onChange={handleInputChange}
-												className="contribution-graph-modal__title-input"
+												className="contribution-graph-modal__title-input elementCard-builder-modal__title-input"
 												style={{
 													...formData.titleStyle,
 													fontSize: "inherits",
@@ -201,7 +274,7 @@ export function GraphForm(props: {
 												}}
 												min={1}
 												max={128}
-												className="contribution-graph-modal__title-size"
+												className="contribution-graph-modal__title-size elementCard-builder-modal__title-size-input"
 											/>
 										</div>
 									</div>
@@ -239,25 +312,25 @@ export function GraphForm(props: {
 										</span>
 										<div className="form-content">
 											<select
-												className="contribution-graph-modal__compact-select"
-												name="graphType"
-												defaultValue={
-													formData.graphType ||
-													graphOptions.find(
-														(p) => p.selected
-													)?.value
-												}
-												onChange={handleInputChange}
-											>
-												{graphOptions.map((option) => (
-													<option
-														value={option.value}
-														key={option.value}
-													>
-														{option.label}
-													</option>
-												))}
-											</select>
+											className="contribution-graph-modal__compact-select elementCard-builder-modal__select"
+											name="graphType"
+											defaultValue={
+												formData.graphType ||
+												graphOptions.find(
+													(p) => p.selected
+												)?.value
+											}
+											onChange={handleInputChange}
+										>
+											{graphOptions.map((option) => (
+												<option
+													value={option.value}
+													key={option.value}
+												>
+													{option.label}
+												</option>
+											))}
+										</select>
 										</div>
 									</div>
 
@@ -267,102 +340,104 @@ export function GraphForm(props: {
 										</span>
 										<div className="form-content contribution-graph-modal__date-range-row">
 											<select
-												className="contribution-graph-modal__date-range-type"
-												defaultValue={
-													formData.dateRangeType ||
-													"LATEST_DAYS"
-												}
-												onChange={(e) => {
+											className="contribution-graph-modal__date-range-type elementCard-builder-modal__select"
+											defaultValue={
+												formData.dateRangeType ||
+												"LATEST_DAYS"
+											}
+											onChange={(e) => {
+												changeFormData(
+													"dateRangeType",
+													e.target
+														.value as DateRangeType
+												);
+												if (
+													e.target.type !=
+													"FIXED_DATE_RANGE"
+												) {
 													changeFormData(
-														"dateRangeType",
-														e.target
-															.value as DateRangeType
+														"fromDate",
+														undefined
 													);
-													if (
-														e.target.type !=
-														"FIXED_DATE_RANGE"
-													) {
-														changeFormData(
-															"fromDate",
-															undefined
-														);
-														changeFormData(
-															"toDate",
-															undefined
-														);
-													} else {
-														changeFormData(
-															"dateRangeValue",
-															undefined
-														);
-													}
-												}}
-											>
-												{dateTypeOptions.map(
-													(option) => (
-														<option
-															value={option.value}
-															key={option.value}
-														>
-															{option.label}
-														</option>
-													)
-												)}
-											</select>
-											{formData.dateRangeType !=
-											"FIXED_DATE_RANGE" ? (
-												<input
-													className="contribution-graph-modal__date-range-value"
-													type="number"
-													defaultValue={
-														formData.dateRangeValue
-													}
-													min={1}
-													placeholder={
-														local.form_date_range_input_placeholder
-													}
-													onChange={(e) =>
-														changeFormData(
-															"dateRangeValue",
-															parseInt(
-																e.target.value
-															)
+													changeFormData(
+														"toDate",
+														undefined
+													);
+												} else {
+													changeFormData(
+														"dateRangeValue",
+														undefined
+													);
+												}
+											}}
+										>
+											{dateTypeOptions.map(
+												(option) => (
+													<option
+														value={option.value}
+														key={option.value}
+													>
+														{option.label}
+													</option>
+												)
+											)
+										}
+										</select>
+										{formData.dateRangeType !=
+										"FIXED_DATE_RANGE" ? (
+											<input
+												className="contribution-graph-modal__date-range-value elementCard-builder-modal__input"
+												type="number"
+												defaultValue={
+													formData.dateRangeValue
+												}
+												min={1}
+												placeholder={
+													local.form_date_range_input_placeholder
+												}
+												onChange={(e) =>
+													changeFormData(
+														"dateRangeValue",
+														parseInt(
+															e.target.value
 														)
+													)
+												}
+											/>
+										) : (
+											<>
+												<input
+													className="contribution-graph-modal__date-range-date elementCard-builder-modal__input"
+													id="fromDate"
+													name="fromDate"
+													type="date"
+													defaultValue={
+														formData.fromDate
+													}
+													placeholder="from date, such as 2023-01-01"
+													onChange={
+														handleInputChange
 													}
 												/>
-											) : (
-												<>
-													<input
-														className="contribution-graph-modal__date-range-date"
-														id="fromDate"
-														name="fromDate"
-														type="date"
-														defaultValue={
-															formData.fromDate
-														}
-														placeholder="from date, such as 2023-01-01"
-														onChange={
-															handleInputChange
-														}
-													/>
-													<span className="contribution-graph-modal__date-range-separator">
-														-
-													</span>
-													<input
-														className="contribution-graph-modal__date-range-date"
-														id="toDate"
-														name="toDate"
-														type="date"
-														defaultValue={
-															formData.toDate
-														}
-														placeholder="to date, such as 2023-12-31"
-														onChange={
-															handleInputChange
-														}
-													/>
-												</>
-											)}
+												<span className="contribution-graph-modal__date-range-separator">
+													-
+												</span>
+												<input
+													className="contribution-graph-modal__date-range-date elementCard-builder-modal__input"
+													id="toDate"
+													name="toDate"
+													type="date"
+													defaultValue={
+														formData.toDate
+													}
+													placeholder="to date, such as 2023-12-31"
+													onChange={
+														handleInputChange
+													}
+												/>
+											</>
+										)
+										}
 										</div>
 									</div>
 
@@ -383,74 +458,46 @@ export function GraphForm(props: {
 					{
 						title: local.form_style_settings,
 						children: (
-							<div className="contribution-graph-modal-form">
+							<div className="contribution-graph-modal-form plugin-config-form">
 								<div className="form-group">
 									<div className="form-item">
-										<span className="label">
-											{local.form_theme}
-										</span>
-										<div className="form-content">
-											<div
-												ref={themeWrapperRef}
-												className="contribution-graph-modal__theme-picker"
-											>
-												<button
-													type="button"
-													className="contribution-graph-modal__theme-trigger plugin-config-palette-trigger-row"
-													onClick={() =>
-														setShowThemeMenu((value) => !value)
-													}
+												<span className="label">
+													{local.form_theme}
+												</span>
+												<div className="form-content">
+													<div
+													ref={themeWrapperRef}
+													className="contribution-graph-modal__theme-picker"
 												>
-													<span className="plugin-config-palette-label">
-														{activeTheme?.label ?? local.form_theme}
-													</span>
-													<div className="plugin-config-swatch-group">
-														{(activeTheme
-															? getThemeSwatches(activeTheme)
-															: cellRules
-																	.map((rule) => rule.color)
-																	.slice(0, 4)
-														).map((color, index) => (
-															<span
-																key={`${color}-${index}`}
-																className="homepage-builder-modal__palette-swatch homepage-builder-modal__palette-swatch--small"
-																style={{ background: color }}
-															/>
-														))}
-													</div>
-												</button>
-												{showThemeMenu ? (
-													<div className="contribution-graph-modal__theme-menu plugin-config-palette-menu">
-														{themes.map((theme) => (
-															<button
-																type="button"
-																key={theme.name}
-																className={`contribution-graph-modal__theme-option plugin-config-palette-option ${activeTheme?.name === theme.name ? "is-active" : ""}`}
-																onClick={() => {
-																	applyTheme(theme.rules);
-																}}
-															>
-																<span className="plugin-config-palette-label">
-																	{theme.label}
-																</span>
-																<div className="plugin-config-swatch-group">
-																	{getThemeSwatches(theme).map(
-																		(color, index) => (
-																			<span
-																				key={`${theme.name}-${color}-${index}`}
-																				className="homepage-builder-modal__palette-swatch homepage-builder-modal__palette-swatch--small"
-																				style={{ background: color }}
-																			/>
-																		)
-																	)}
-																</div>
-															</button>
-														))}
-													</div>
-												) : null}
+													<button
+														type="button"
+														ref={themeTriggerRef}
+														className="contribution-graph-modal__theme-trigger plugin-config-palette-trigger-row elementCard-builder-modal__palette-trigger-row"
+														onClick={() => {
+															togglePaletteMenu();
+														}}
+													>
+														<span className="plugin-config-palette-label elementCard-builder-modal__palette-trigger-label">
+															{activeTheme?.label ?? local.form_theme}
+														</span>
+														<div className="plugin-config-swatch-group elementCard-builder-modal__palette-swatches">
+															{(activeTheme
+																? getThemeSwatches(activeTheme)
+																: cellRules
+																		.map((rule) => rule.color)
+																		.slice(0, 4)
+															).map((color, index) => (
+																<span
+																	key={`${color}-${index}`}
+																	className="elementCard-builder-modal__palette-swatch elementCard-builder-modal__palette-swatch--small"
+																	style={{ background: color }}
+																/>
+															))}
+														</div>
+													</button>
+												</div>
+												</div>
 											</div>
-										</div>
-									</div>
 									<div className="form-item">
 										<span className="label">
 											{local.form_fill_the_screen_label}
@@ -479,34 +526,36 @@ export function GraphForm(props: {
 											</span>
 											<div className="form-content">
 												<select
-													id="startOfWeek"
-													name="startOfWeek"
-													defaultValue={
-														formData.startOfWeek !=
-														undefined
-															? formData.startOfWeek
-															: startOfWeekOptions.find(
-																	(p) =>
-																		p.selected
-															  )?.value
-													}
-													onChange={handleInputChange}
-												>
-													{startOfWeekOptions.map(
-														(option) => (
-															<option
-																value={
-																	option.value
-																}
-																key={
-																	option.value
-																}
-															>
-																{option.label}
-															</option>
-														)
-													)}
-												</select>
+											id="startOfWeek"
+											name="startOfWeek"
+											className="elementCard-builder-modal__select"
+											defaultValue={
+												formData.startOfWeek !=
+												undefined
+													? formData.startOfWeek
+													: startOfWeekOptions.find(
+															(p) =>
+																p.selected
+														  )?.value
+											}
+											onChange={handleInputChange}
+										>
+											{startOfWeekOptions.map(
+												(option) => (
+													<option
+														value={
+															option.value
+														}
+														key={
+															option.value
+														}
+													>
+														{option.label}
+													</option>
+												)
+											)
+										}
+										</select>
 											</div>
 										</div>
 									)}
@@ -569,19 +618,20 @@ export function GraphForm(props: {
 										</span>
 										<div className="form-content">
 											<select
-												name="cellShape"
-												defaultValue={getDefaultCellShape()}
-												onChange={handleCellShapeChange}
-											>
-												{cellShapes.map((option) => (
-													<option
-														value={option.value}
-														key={option.label}
-													>
-														{option.label}
-													</option>
-												))}
-											</select>
+											name="cellShape"
+											className="elementCard-builder-modal__select"
+											defaultValue={getDefaultCellShape()}
+											onChange={handleCellShapeChange}
+										>
+											{cellShapes.map((option) => (
+												<option
+													value={option.value}
+													key={option.label}
+												>
+													{option.label}
+												</option>
+											))}
+										</select>
 										</div>
 									</div>
 									<div className="form-item">

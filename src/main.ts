@@ -1,13 +1,4 @@
-import {
-	Editor,
-	MarkdownFileInfo,
-	MarkdownView,
-	Menu,
-	Notice,
-	Plugin,
-	TFile,
-	setIcon,
-} from "obsidian";
+import { Editor, MarkdownFileInfo, MarkdownView, Menu, Notice, Plugin, TFile, setIcon, } from "obsidian";
 import { ElementCardBuilderModal } from "./elementCardBuilderModal";
 import { Locals } from "./i18/messages";
 import { parseElementCardConfig } from "./elementCardConfig";
@@ -28,7 +19,14 @@ import { mountEditButtonToCodeblock } from "./view/codeblock/CodeblockEditButton
 import { ContributionGraphCreateModal } from "./view/form/GraphFormModal";
 import { ForceViewModeManager } from "./forceViewMode";
 import { CursorPositionManager } from "./cursorPosition";
-import "../styles.css";
+
+// Load CSS dynamically
+const loadCss = () => {
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'styles.css';
+  document.head.appendChild(link);
+};
 
 
 declare global {
@@ -84,6 +82,7 @@ export default class ElementCardComponentPlugin extends Plugin {
 
 	async onload() {
 		await this.loadSettings();
+		loadCss();
 		applyElementCardStyles(this.settings);
 		this.registerGlobalRenderApi();
 

@@ -59,6 +59,13 @@ export abstract class BaseGraphRender implements GraphRender {
 		return main;
 	}
 
+	createChartsScrollEl(parent: HTMLElement): HTMLDivElement {
+		return createDiv({
+			cls: "charts-scroll",
+			parent,
+		});
+	}
+
 	renderTitle(
 		graphConfig: ContributionGraphConfig,
 		parent: HTMLElement
